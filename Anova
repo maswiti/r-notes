@@ -1,0 +1,215 @@
+Predict the onset of diabetes:
+Before training the neural network model, you’ll want to check for and handle any
+missing values or NaN’s in your dataset.
+
+# Load necessary libraries
+library(neuralnet)
+library(NeuralNetTools) 
+# Load the iris dataset 
+data(iris) 
+# Convert Species to numerical 
+iris$Species <- as.numeric(factor(iris$Species)) 
+# Split the data into a training set (70% of the data) and a test set (30% of 
+the data) 
+set.seed(12345) 
+trainIndex <- sample(1:nrow(iris), nrow(iris)*0.7) 
+trainData <- iris[trainIndex, ] 
+testData <- iris[-trainIndex, ] 
+# Scale the training and test datasets 
+maxs <- apply(trainData, 2, max) 
+mins <- apply(trainData, 2, min) 
+scaled_trainData <- as.data.frame(scale(trainData, center = mins, scale = 
+maxs - mins)) 
+scaled_testData <- as.data.frame(scale(testData, center = mins, scale = maxs - mins)) # use the same scaling parameters 
+# Specify the formula 
+vars <- names(trainData) 
+f <- as.formula(paste("Species ~", paste(vars[!vars %in% "Species"], collapse 
+= " + "))) 
+# Train the neural network 
+set.seed(12345) 
+nn <- neuralnet(f, data = scaled_trainData, hidden = 5) 
+# Plot the neural network 
+plotnet(nn, alpha = 0.5)
+testPredictors <- scaled_testData[, vars[!vars %in% "Species"]] 
+predictions <- predict(nn, testPredictors) 
+# Rescale the predicted values 
+predicted <- predictions * (maxs["Species"] - mins["Species"]) + 
+mins["Species"] 
+# Round the predicted values and clamp them to the range 1-3 
+predicted_rounded <- pmin(pmax(round(predicted), 1), 3) 
+# Calculate the accuracy 
+actuals <- testData$Species 
+accuracy <- mean(predicted_rounded == actuals) 
+print(accuracy)
+
+ Support vector machine modeling with the 
+‘PimaIndiansDiabetes’ dataset
+
+# Load necessary libraries 
+library(e1071) # For svm() function 
+library(caret) # For createDataPartition() function 
+## Warning: package 'caret' was built under R version 4.3.3 
+## Loading required package: ggplot2 
+## Loading required package: lattice 
+library(mlbench) # For PimaIndiansDiabetes dataset 
+# Load Pima Indians Diabetes dataset 
+data(PimaIndiansDiabetes) 
+diabetes <- PimaIndiansDiabetes 
+# Split the data into a training set (70% of the data) and a test set (30% of 
+the data) 
+set.seed(12345) 
+trainIndex <- createDataPartition(diabetes$diabetes, p = 0.7, list = FALSE) 
+trainData <- diabetes[trainIndex, ] 
+testData <- diabetes[-trainIndex, ] 
+# Train the SVM model 
+svm_model <- svm(diabetes ~ ., data = trainData, kernel = "radial") 
+# Generate predictions on the test set 
+predictions <- predict(svm_model, testData) 
+# Calculate the accuracy 
+accuracy <- sum(predictions == testData$diabetes) / nrow(testData) 
+print(accuracy) 
+
+Next, we will create a SVM plot with the ggplot() function.
+
+# Load necessary libraries 
+library(e1071) # For svm() function 
+library(ggplot2) # For visualization 
+library(mlbench) # For PimaIndiansDiabetes dataset 
+# Load Pima Indians Diabetes dataset 
+data(PimaIndiansDiabetes) 
+diabetes <- PimaIndiansDiabetes 
+# Select only two variables and the target 
+df <- diabetes[, c("glucose", "mass", "diabetes")] 
+# Train the SVM model 
+svm_model <- svm(diabetes ~ ., data = df, kernel = "linear") 
+# Create a grid for the plot 
+grid <- expand.grid(glucose = seq(min(df$glucose), max(df$glucose), 
+length.out = 100), 
+mass = seq(min(df$mass), max(df$mass), length.out = 100)) 
+# Predict the grid to get decision values 
+grid$diabetes <- predict(svm_model, grid) 
+# Plot the decision boundary and the data points 
+ggplot(df, aes(glucose, mass)) + 
+geom_tile(data = grid, aes(fill = diabetes), alpha = 0.5) + 
+geom_point(aes(color = diabetes)) + 
+scale_fill_brewer(palette = "Set1") + 
+scale_color_brewer(palette = "Set1") + 
+theme_minimal() + 
+labs(title = "SVM Decision Boundary", x = "Glucose", y = "Mass", fill = 
+"Diabetes", color = "Diabetes")
+
+ Linear discriminant analysis with the IRIS dataset
+# Load necessary libraries 
+library(MASS) # For lda() function 
+library(caret) # For createDataPartition() function 
+library(ggplot2) # For visualization 
+# Load the iris dataset 
+data(iris) 
+# Split the data into a training set (70% of the data) and a test set (30% of 
+the data) 
+set.seed(12345) 
+trainIndex <- createDataPartition(iris$Species, p = 0.7, list = FALSE) 
+trainData <- iris[trainIndex, ] 
+testData <- iris[-trainIndex, ] 
+# Train the LDA model 
+lda_model <- lda(Species ~ ., data = trainData) 
+# Generate predictions on the test set 
+predictions <- predict(lda_model, testData)$class 
+# Calculate the accuracy 
+accuracy <- sum(predictions == testData$Species) / nrow(testData) 
+print(accuracy) 
+## [1] 0.9777778 
+# Create a data frame for plotting 
+plotData <- cbind(as.data.frame(predict(lda_model)$x), Species = 
+trainData$Species) 
+# Plot the LDA values 
+ggplot(plotData, aes(LD1, LD2)) + 
+geom_point(aes(color = Species)) + 
+theme_minimal() + 
+labs(title = "Linear Discriminant Analysis", x = "LD1", y = "LD2", color = 
+"Species") 
+
+ Quadratic discriminant analysis 
+
+# Load necessary libraries 
+library(MASS) # For qda() function 
+library(mlbench) # For PimaIndiansDiabetes dataset 
+library(caret) # For createDataPartition() function 
+library(ggplot2) # For visualization 
+# Load the Pima Indians Diabetes dataset 
+data(PimaIndiansDiabetes) 
+diabetes <- PimaIndiansDiabetes 
+# Split the data into a training set (70% of the data) and a test set (30% of 
+the data) 
+set.seed(12345) 
+trainIndex <- createDataPartition(diabetes$diabetes, p = 0.7, list = FALSE) 
+trainData <- diabetes[trainIndex, ] 
+testData <- diabetes[-trainIndex, ] 
+# Train the QDA model 
+qda_model <- qda(diabetes ~ ., data = trainData) 
+# Generate predictions on the test set 
+predictions <- predict(qda_model, testData)$class 
+# Calculate the accuracy 
+accuracy <- sum(predictions == testData$diabetes) / nrow(testData) 
+print(accuracy)
+Principal component analysis
+# Load the USArrests dataset 
+data(USArrests) 
+# Normalize the data 
+USArrests_scaled <- scale(USArrests) 
+# Perform PCA 
+pca_model <- prcomp(USArrests_scaled, center = TRUE, scale. = TRUE) 
+## The PCA scores, i.e., the coordinates of each city/state in the new PCA 
+space 
+pca_model$x
+# Print a summary of the PCA model 
+summary(pca_model) 
+# Create a biplot of the PCA model 
+biplot(pca_model, scale = 0) 
+
+Cluster analysis with the USarrests dataset.
+# Load necessary libraries 
+library(cluster) # For clusplot() function 
+# Load the USArrests dataset 
+data(USArrests) 
+# Normalize the data 
+USArrests_scaled <- scale(USArrests) 
+# Perform K-means clustering with 4 clusters 
+set.seed(12345) # For reproducibility 
+kmeans_model <- kmeans(USArrests_scaled, centers = 4) 
+# Print the cluster assignments 
+print(kmeans_model$cluster)
+# Plot the clusters 
+clusplot(USArrests_scaled, kmeans_model$cluster, color=TRUE, shade=TRUE, 
+labels=2, lines=0)
+
+Analysis of variance 
+# Load the data 
+data(iris) 
+# Perform one-way ANOVA 
+anova_result <- aov(Sepal.Length ~ Species, data = iris) 
+# Print a summary of the ANOVA model 
+summary(anova_result)
+
+Multivariate analysis of variance
+
+# Load the necessary library 
+library(stats) # For MANOVA() function 
+library(datasets) # For mtcars dataset 
+# Load the data 
+data(mtcars) 
+# Convert cyl and am variables to factors 
+mtcars$cyl <- factor(mtcars$cyl) 
+mtcars$am <- factor(mtcars$am) 
+# Fit the MANOVA model 
+manova_model <- manova(cbind(mpg, disp, hp) ~ cyl + am, data = mtcars) 
+# Print a summary of the MANOVA model 
+summary(manova_model)
+
+
+
+
+
+
+
+
