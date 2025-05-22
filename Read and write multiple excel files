@@ -1,0 +1,77 @@
+# install and call the packages
+library(writexl)
+library(readxl)
+library(tidyverse)
+library(purrr)
+#create the directory where the files to be saved
+dir.create("txhousing")
+#create one excel file
+writexl::write_xlsx(txhousing,path = "txhousing/txhousing.xlsx")
+#function to create multiple excel files
+write_ex_file = function(city_name){
+ txhousing %>% filter(city==city_name) %>%
+ writexl::write_xlsx(path =
+paste0("txhousing/txhousing_",city_name,".xlsx"))
+}
+#list of unique city names
+list_city = unique(txhousing$city)
+#loop to create multiple excel files
+purrr::map(.x = list_city,write_ex_file)
+
+
+EXAMPLE 2
+
+# install and call the packages
+library(writexl)
+library(readxl)
+library(tidyverse)
+library(purrr)
+lambda = 0.2 # EWMA smoothing parameter
+n1 = 5 # subgroup size
+dir.create("bootstrap_EWMA")
+## Warning in dir.create("bootstrap_EWMA"): 'bootstrap_EWMA' already exists
+write_file = function(value){
+ EWMA.values = array(NA,dim = c(2000,200))
+ ## vary the lambda value for lambda = 0.1,0.15,0.2,0.25,...,0.9,0.95 and
+ ## store the matrix of EWMA values in separate excel sheets for each
+lambda.
+ IC.sample = rnorm(ncol(EWMA.values))
+ mu = 0
+for(i in 1:nrow(EWMA.values)){
+ for(j in 1:ncol(EWMA.values)){
+ if(j>1){
+ spl = sample(IC.sample,n1,replace = T)
+ EWMA.values[i,j] = lambda*mean(spl)+(1-lambda)*EWMA.values[i,(j-1)]
+ }else{
+ EWMA.values[i,j] = 0
+ }
+ }
+ }
+ EWMA.values = data.frame(EWMA.values)
+writexl::write_xlsx( EWMA.values,path =
+paste0("bootstrap_EWMA/EWMA_values_lambda=0.2_",value,".xlsx"))
+}
+write_file(0.2)
+list_values = c(1:20)
+purrr::map(.x = list_values, .f = write_file)
+
+Reading multiple Excel files
+# install and call the packages
+library(writexl)
+library(readxl)
+library(tidyverse)
+# get the list of files
+list_files = list.files(path = "bootstrap_EWMA",full.names = T)
+# read excel files
+read_files = function(file){
+ if(is.na(file)) stop("no file path") # test if the path exists
+ df = readxl::read_excel(file)
+ df
+}
+# test if the first excel file is read
+read_files(file=list_files[1])
+# loop to read all excel files
+df_list = purrr::map(.x = list_files,read_files)
+# get the first data frame
+df_1 = df_list[[1]]
+df_1
