@@ -1,0 +1,29 @@
+# Load necessary library 
+library(e1071) 
+library(ggplot2) 
+ 
+# Load the mtcars dataset 
+data("mtcars") 
+ 
+# Fit the SVR model predicting mpg based on wt and hp 
+svr_model <- svm(mpg ~ wt + hp, data = mtcars, type = "eps-regression", 
+kernel = "radial") 
+ 
+# Make predictions over a grid to plot 
+wt_seq <- seq(min(mtcars$wt), max(mtcars$wt), length.out = 100) 
+hp_seq <- seq(min(mtcars$hp), max(mtcars$hp), length.out = 100) 
+grid <- expand.grid(wt = wt_seq, hp = hp_seq) 
+grid$mpg <- predict(svr_model, newdata = grid) 
+ 
+# Basic plot of the fitted surface 
+ggplot(grid, aes(x = wt, y = hp, fill = mpg)) + 
+  geom_tile() +  
+  geom_contour(aes(z = mpg), color = "white") + 
+  labs(title = "SVR Model Prediction of mpg", 
+       x = "Weight (1000 lbs)", 
+       y = "Horsepower", 
+       fill = "Miles per Gallon") + 
+  theme_minimal()+ 
+ 
+# Optionally add the actual data points 
+geom_point(data = mtcars, aes(x = wt, y = hp, color = mpg), size = 3) 
