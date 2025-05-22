@@ -1,0 +1,67 @@
+You can tune the parameters in the SVM model as follows to get the best model:
+# Load library
+library(tidyverse)
+library(e1071)
+# Load and split the data
+data("mtcars")
+set.seed(123)
+sample_index <- sample(1:nrow(mtcars), size = 0.7 * nrow(mtcars))
+train_data <- mtcars[sample_index, ]
+test_data <- mtcars[-sample_index, ]
+# Grid search for best epsilon and cost
+tune_result <- tune(
+ svm,
+ mpg ~ ., # formula
+ data = train_data,
+ ranges = list(epsilon = seq(0, 1, 0.1),
+ cost = c(0.1, 1, 10, 100)
+ ),
+ type = "eps-regression",
+ kernel = "radial"
+)
+# Print the best model and parameters
+best_model <- tune_result$best.model
+summary(best_model)
+# Predict on test data
+predictions <- predict(best_model, newdata = test_data)
+# Evaluate performance
+rmse <- sqrt(mean((predictions - test_data$mpg)^2))
+cat("RMSE on test data:", round(rmse, 2), "\n")
+## RMSE on test data: 2.31
+# Check number of support vectors
+num_sv <- length(best_model$index)
+n_train <- nrow(train_data)
+sv_ratio <- num_sv / n_train
+cat("Number of support vectors:", num_sv, "\n")
+## Number of support vectors: 22
+cat("Support vector ratio:", round(sv_ratio, 2), "\n")
+## Support vector ratio: 1
+cat("Within 20%-80% range:", sv_ratio >= 0.2 & sv_ratio <= 0.8, "\n")
+
+
+Training Error
+A. For Classification
+data(iris)
+# Fit SVM
+model <- svm(Species ~ ., data = iris, kernel = "radial")
+# Get predicted classes
+pred <- predict(model, iris)
+# Calculate training error
+training_error <- mean(pred != iris$Species)
+print(training_error)
+
+B. For Regression
+Note: This regression is not linear regression. Rather the regression is done by the support
+vector machine model, called the support vector regression (SVR).
+model_reg <- svm(mpg ~ ., data = mtcars, type = "eps-regression")
+pred_reg <- predict(model_reg, mtcars)
+# Example: Root Mean Squared Error (RMSE)
+rmse <- sqrt(mean((pred_reg - mtcars$mpg)^2))
+print(rmse)
+
+Feature Scaling
+By default, svm() automatically scales numeric variables, unless you specify scale =
+FALSE.
+You can retrieve scaling details like this:
+model$x.scale # for features
+model$y.scale # for response
