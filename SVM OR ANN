@@ -1,0 +1,30 @@
+# Load necessary libraries 
+library(ggplot2) 
+library(lattice) 
+library(e1071) 
+library(neuralnet) 
+library(caret) 
+# Split the mtcars data into training and testing datasets 
+set.seed(123) 
+trainIndex <- createDataPartition(mtcars$mpg, p = .8, 
+ list = FALSE, 
+ times = 1) 
+mtcarsTrain <- mtcars[ trainIndex,] 
+mtcarsTest <- mtcars[-trainIndex,] 
+ 
+# Train a SVM model 
+svm_model <- svm(mpg ~ ., data = mtcarsTrain) 
+# Make predictions 
+svm_predictions <- predict(svm_model, mtcarsTest) 
+ 
+# Train a neural network model 
+nn_model <- neuralnet(mpg ~ ., data = mtcarsTrain, hidden = 2) 
+# Make predictions 
+nn_predictions <- compute(nn_model, mtcarsTest[,-1]) 
+ 
+# Evaluate models 
+svm_MSE <- postResample(svm_predictions, mtcarsTest$mpg) 
+nn_MSE <- postResample(nn_predictions$net.result, mtcarsTest$mpg) 
+ 
+print(svm_MSE) 
+print(nn_MSE)
