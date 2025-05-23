@@ -1,0 +1,24 @@
+Decision Trees
+##########################
+library(rpart)
+library(rpart.plot)
+## Warning: package 'rpart.plot' was built under R version 4.3.3
+# Example using iris dataset
+data(iris)
+model_dt <- rpart(Species ~ ., data = iris, method = "class")
+rpart.plot(model_dt)
+# Predict
+pred_dt <- predict(model_dt, iris, type = "class")
+head(pred_dt)
+
+###########################
+Random Forest
+###########################
+library(randomForest)
+# Use iris dataset
+data(iris)
+model_rf <- randomForest(Species ~ ., data = iris, ntree = 100)
+# Predict
+pred_rf <- predict(model_rf, iris)
+head(pred_rf)
+
