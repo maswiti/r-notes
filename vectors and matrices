@@ -1,0 +1,88 @@
+##Value Vector
+A = c(1,1,4,5,6,7,8,8,6)
+A
+
+##Character Vector
+B  = c("Puki", "Beauty","Tshepo", "Fanyana")
+B
+
+##Matrices
+A_Matrix = matrix(A, nrow = 3,ncol = 3,byrow = FALSE)
+A_Matrix
+
+##Array function
+##Array(data, dim = c(dim1,dim2, dim3))
+##Dim1=nrow,dim2=ncol, dim3=layers
+##Example
+Array_Matrice = array(A, dim = c(3,3,3))
+Array_Matrice
+
+##Function to know
+##pmax and pmin
+##This function compares elements at the same positions and returns  the smallest
+##largest  value of each position
+
+##Vectors and matrices
+##1,t(B) - Transpose of matrix b
+##2,A %*% B - product of A and B
+##3, t(a) %*% B - product of t(A) and B
+
+##Removing Memory
+##rm(list = Is())
+
+##Linear Equation
+##Det() - This function checks the determinant of a function
+##Solve() - Used to compute the inverse of a square matrix.
+##It can also be used to solve a system of linear equation
+
+##Inverse of a non singular matrix
+##its det() must not be zero
+Matrix_A = matrix(c(2,6,1,-3,0,5,5,4,7),ncol = 3)
+Matrix_A
+det(Matrix_A)
+solve(Matrix_A)
+
+##Inverse of a singular det(A) = 0 then obtain the inverse with gin(A)
+##gin(A) - use the mass function package
+
+##Matrix Operation
+##cbind()- combine two or more matrices by column, Number of rows must be the same
+##rbind()- combine two or more matrices by row, number of columns must be the same
+
+##Missing Value 
+##is.na(Z)
+##y = z[!is.na(z)] - remove the missing value
+
+##Random sample
+##sample(a:b,n,replace = true/false) - with replacement or without replacement
+
+##List and data frame
+Lst = list(name = "Fred","Marry","puki","Thulani",
+           no.children = "3",
+           child.ages = c(3,4,5)
+           )
+Lst
+
+##Number of things 
+##Length(A)
+
+##Eigen value 
+##eigen(A)
+##z$value - eigen value
+##z$vector - eigen vector
+
+##Creating a diagonal matrix
+## diag_matrix = diag(1:3)
+
+##Matrix function
+##det()
+#inverse - solve(),det not= 0 
+##inverse when det = 0, ginv(),package mass
+
+##Assigning column names and row names
+##rownames(data) = c("","")
+##colnames(data) = c("","")
+
+##Retrieving_names col/row 
+##row_names = rownames(data)
+##col_names = colnames(data)
