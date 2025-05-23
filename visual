@@ -1,0 +1,49 @@
+##CORRELATION PLOT
+
+ library(GGally)
+ data1 = data.frame(mtcars$mpg,mtcars$hp,mtcars$wt)
+ ggpairs(data1)
+ 
+ 
+ ##Stock Market
+
+p = ggplot() + geom_line(data = var1, aes(x = x, y = Stockmarket.value), color = "blue") +
+  xlab('Units') + 
+  ylab('percent.change')
+
+p1 = p+geom_line(data = var2,aes(x = x, y = Stockmarket.value),color = "red") +
+ xlab('Units') +
+ ylab('percent.change')
+
+ p
+ p1
+ 
+ ##BOX PLOTS
+ library(tidyverse)
+ data("AirPassengers") 
+data = data.frame(AirPassengers) 
+
+# create a basic boxplot with ggplot2 
+ggplot(data, aes(x = "", y = AirPassengers)) + 
+  geom_boxplot() + 
+  labs(title = "Boxplot of AirPassengers Dataset", x = "", y = "Number of 
+Passengers")
+
+# change the fill color of the boxplot 
+ggplot(data, aes(x = "", y = AirPassengers)) + 
+  geom_boxplot(fill = "lightblue") + 
+  labs(title = "Boxplot of AirPassengers Dataset", x = "", y = "Number of 
+Passengers")
+
+# add notches to the boxplot to show confidence interval around the median 
+ggplot(data, aes(x = "", y = AirPassengers)) + 
+  geom_boxplot(notch = TRUE, fill = "lightblue") + 
+  labs(title = "Boxplot of AirPassengers Dataset", x = "", y = "Number of 
+Passengers")
+
+# customize the x-axis labels 
+ggplot(data, aes(x = "", y = AirPassengers)) + 
+  geom_boxplot(fill = "lightblue") + 
+  labs(title = "Boxplot of AirPassengers Dataset", x = "", y = "Number of 
+Passengers") + 
+  scale_x_discrete(labels = "Passenger Count") 
