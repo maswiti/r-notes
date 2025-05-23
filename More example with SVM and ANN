@@ -1,0 +1,99 @@
+##More example with SVM and ANN 
+
+rm(list = ls())
+# Load necessary packages
+library(Ecdat)
+library(e1071)
+library(neuralnet)
+# Load the data
+data(Caschool)
+data <- Caschool
+str(data)
+
+#############################
+# Create a binary target: high_score = 1 if test score > average, else 0
+mean_score <- mean(data$testscr, na.rm = TRUE)
+data$high_score <- as.numeric(data$testscr > mean_score)
+
+#############################
+# Select and convert relevant predictors to numeric
+data$str <- as.numeric(data$str) # student-teacher ratio
+data$expnstu <- as.numeric(data$expnstu) # expenditure per student
+data$elpct <- as.numeric(data$elpct) # % English learners
+data$avginc <- as.numeric(data$avginc) # avg. household income
+
+#############################
+# Train-test split
+set.seed(100)
+index <- sample(1:nrow(data), 0.7 * nrow(data))
+train_data <- data[index, ]
+test_data <- data[-index, ]
+
+#############################
+# Train SVM with probability support
+train_data$high_score <- as.factor(train_data$high_score)
+svm_model <- svm(high_score ~ str + expnstu + elpct + avginc,
+ data = train_data, kernel = "linear", scale = TRUE,
+probability = TRUE)
+# Predict on test data
+svm_preds <- predict(svm_model, newdata = test_data)
+
+#############################
+# Train ANN
+ann_model <- neuralnet(high_score ~ str + expnstu + elpct + avginc,
+ data = train_data,
+hidden = c(2),
+ linear.output = FALSE,
+ stepmax = 1e7)
+# Plot ANN
+plot(ann_model)
+# Predict on test data
+ann_preds <- predict(ann_model, newdata = test_data)
+# Threshold ANN outputs
+ann_class_preds <- ifelse(ann_preds > 0.5, 1, 0)
+
+############################
+# Evaluate model errors
+test_data$high_score_num <- as.numeric(as.character(test_data$high_score))
+# SVM test error
+svm_test_error <- mean(svm_preds != test_data$high_score)
+cat("SVM Test Error:", round(svm_test_error, 4), "\n")
+# ANN test error
+ann_test_error <- mean(ann_class_preds != test_data$high_score_num)
+cat("ANN Test Error:", round(ann_test_error, 4), "\n")
+
+############################
+# Dummy input (hypothetical school)
+dummy <- data.frame(
+ str = 18, # student-teacher ratio
+ expnstu = 5000, # expenditure per student
+ elpct = 10, # % English learners
+ avginc = 25 # average household income (in $1000s)
+)
+# SVM prediction for dummy input
+svm_pred_dummy <- predict(svm_model, newdata = dummy, probability = TRUE)
+svm_prob <- attr(svm_pred_dummy, "probabilities")
+cat("🔹 SVM Prediction (class):", as.character(svm_pred_dummy), "\n")
+## SVM Prediction (class): 1
+cat("🔹 SVM Probabilities:\n")
+## SVM Probabilities:
+print(svm_prob)
+
+############################
+# ANN prediction
+ann_pred_dummy <- predict(ann_model, newdata = dummy)
+ann_class_dummy <- ifelse(ann_pred_dummy > 0.5, 1, 0)
+cat("🔸 ANN Prediction (probability):", round(ann_pred_dummy, 4), "\n")
+## ANN Prediction (probability): 0.466 0.5341
+cat("🔸 ANN Predicted Class:", ann_class_dummy, "\n")
+
+
+
+
+
+
+
+
+
+
+
